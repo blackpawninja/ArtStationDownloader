@@ -41,14 +41,13 @@ class Core:
             self.log('[Finish][image][{}]'.format(file_full_path))
 
     def download_video(self, id, file_path):
-        file_full_path = os.path.join(file_path, "{}.{}".format(id, 'mp4'))
+        file_full_path = "{}-{}.{}".format(file_path, id, 'mp4')
         if os.path.exists(file_full_path):
             self.log('[Exist][video][{}]'.format(file_full_path))
         else:
             video = pafy.new(id)
             best = video.getbest(preftype="mp4")
             r = requests.get(best.url)
-            os.makedirs(file_path, exist_ok=True)
             with open(file_full_path, "wb") as code:
                 code.write(r.content)
             self.log('[Finish][video][{}]'.format(file_full_path))
@@ -70,8 +69,8 @@ class Core:
                 url = asset['image_url']
                 file_name = urlparse(url).path.split('/')[-1]
                 try:
-                    self.futures.append(self.executor.submit(self.download_file,
-                                                             url, file_path, file_name))
+                    save_path = file_path + '-' + file_name
+                    self.futures.append(self.executor.submit(self.download_file, url, user_path, save_path))
                 except Exception as e:
                     print(e)
             if not self.no_video and asset['has_embedded_player']:  # 包含视频
